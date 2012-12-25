@@ -1,0 +1,6 @@
+Installation
+- install Android SDK
+- copy project.properties.sample to project.properties and local.properties.sample to local.properties
+- edit project.properties and local.properties if need.
+- connect an Android Device or start Android Emulator.
+- $ ant debug install
