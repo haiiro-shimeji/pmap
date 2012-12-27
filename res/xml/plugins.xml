@@ -1,1 +1,4 @@
-<plugin name="Geolocation" value="org.apache.cordova.GeoBroker" />
+<plugins>
+    <plugin name="Compass" value="org.apache.cordova.CompassListener" />
+    <plugin name="Geolocation" value="org.apache.cordova.GeoBroker" />
+</plugins>
