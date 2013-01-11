@@ -1,7 +1,7 @@
 if (  !( location.href == 'file:///android_asset/www/index.html' ) ) {
-	
+
 	navigator.compass = {
-		
+
 		watchHeading: function( success, error, options ) {
 			var _callSuccess = function( interval, _callback ) {
 				return $.Deferred()
@@ -23,9 +23,9 @@ if (  !( location.href == 'file:///android_asset/www/index.html' ) ) {
 
 			options = options || {}
 			_callSuccess( options.frequency || 100, success )
-			
+
 		}
-		
+
 	}
-	
+
 }
