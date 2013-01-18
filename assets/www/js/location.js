@@ -6,6 +6,9 @@ pmap.Location.View = Backbone.View.extend({
 
 	position: { coords: {} },
 
+    geolocationWatchId: undefined,
+    compassWatchId: undefined,
+
 	initialize: function( data ) {
 
 		var self = this
@@ -15,38 +18,44 @@ pmap.Location.View = Backbone.View.extend({
 			debug.$el.append( ( this.$el = $("<div>").attr("id","location") ) )
 		}
 
-		if ( location.href == 'file:///android_asset/www/index.html' ) {
-			document.addEventListener("deviceready", function() { self._init() }, false);
-		} else {
-			this._init()
-		}
+        $("#location_button").click(function() {
+            if (!self.geolocationWatchId) {
+                self._startWatch()
+            } else {
+                self._stopWatch()
+            }
+        })
+
+		this._debugPrintPosition()
 
 	},
 
-	_init: function() {
+	_startWatch: function() {
 
 		var self = this
 
-		var geolocationWatchId = navigator.geolocation.watchPosition(
-			function( position ) {
-				$.map( position.coords, function( value, key ) {
-					if ( null != value ) {
-						self.position.coords[ key ] = value
-					}
-				} )
-			},
-			$.noop,
-			{
-				enableHighAccuracy: true,
-				maximumAge: 3000, 
-				timeout: 5000
-			}
-		)
+        if (!this.geolocationWatchId) {
+    		this.geolocationWatchId = navigator.geolocation.watchPosition(
+    			function( position ) {
+    				$.map( position.coords, function( value, key ) {
+    					if ( null != value ) {
+    						self.position.coords[ key ] = value
+    					}
+    				} )
+    			},
+    			$.noop,
+    			{
+    				enableHighAccuracy: true,
+    				maximumAge: 3000, 
+    				timeout: 5000
+    			}
+    		)
+        }
 
 		//	geolocation api does not always return heading.
 		//	But navigator.compass is not always defined (in device does not support it?).
-		if ( navigator.compass ) {
-			var compassWatchId = navigator.compass.watchHeading(
+		if (!this.compassWatchId && navigator.compass) {
+			this.compassWatchId = navigator.compass.watchHeading(
 				function( heading ) {
 					$.each( heading, function( key, value ) {
 						return self.position.coords[ key ] = value
@@ -56,9 +65,21 @@ pmap.Location.View = Backbone.View.extend({
 			)
 		}
 
-		this._debugPrintPosition()
-
 	},
+
+    _stopWatch: function() {
+
+        if (this.geolocationWatchId) {
+            navigator.geolocation.clearWatch(this.geolocationWatchId)
+            this.geolocationWatchId = null
+        }
+
+        if (this.compassWatchId) {
+            navigator.compass.clearWatch(this.compassWatchId)
+            this.compassWatchId = null
+        }
+
+    },
 
 	_debugPrintPosition: function() {
 
