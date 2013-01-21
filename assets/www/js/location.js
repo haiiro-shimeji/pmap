@@ -4,6 +4,8 @@ pmap.Location.View = Backbone.View.extend({
 
 	el: "#location",
 
+    app: undefined,
+
 	position: { coords: {} },
 
     geolocationWatchId: undefined,
@@ -12,6 +14,8 @@ pmap.Location.View = Backbone.View.extend({
 	initialize: function( data ) {
 
 		var self = this
+
+        this.app = data.app
 
 		var debug = data.app.findView("Debug")
 		if ( debug ) {
@@ -65,6 +69,8 @@ pmap.Location.View = Backbone.View.extend({
 			)
 		}
 
+        self._displayLocationalMarker()
+
 	},
 
     _stopWatch: function() {
@@ -78,6 +84,74 @@ pmap.Location.View = Backbone.View.extend({
             navigator.compass.clearWatch(this.compassWatchId)
             this.compassWatchId = null
         }
+
+    },
+
+    _displayLocationalMarker: function() {
+
+        var self = this
+
+        var _updatePosition = function() {
+
+            return $.Deferred()
+                .resolve()
+                .pipe(function(defer) {
+                    return $.Deferred(function(defer) {
+                        setTimeout(function() {
+                            defer.resolve()
+                        }, 1000)
+                    })
+                    .promise()
+                })
+            .done(function() {
+
+                if (self.position.coords.latitude
+                    && self.position.coords.longitude) {
+                    marker.move(
+                        new OpenLayers.LonLat(
+                            self.position.coords.longitude,
+                            self.position.coords.latitude
+                        )
+                        .transform('EPSG:4326', 'EPSG:900913')
+                    )
+                }
+
+                if (self.position.coords.magneticHeading) {
+                    marker.attributes.angle = self.position.coords.magneticHeading
+                }
+
+            })
+            .pipe(function() {
+                return _updatePosition()
+            })
+
+        }
+
+        var overlay = new OpenLayers.Layer.Vector('Overlay', {
+            styleMap: new OpenLayers.StyleMap({
+                externalGraphic: 'img/direction.png',
+                graphicWidth: 24,
+                graphicHeight: 24,
+                graphicXOffset: -12,
+                graphicYOffset: -12,
+                rotation: "${angle}",
+                title: 'current location'
+            })
+        })
+
+        self.app.findView("Map").map.addLayer(overlay)
+
+        var marker = new OpenLayers.Feature.Vector(
+            new OpenLayers.Geometry.Point(139.764772, 35.681610)
+                .transform('EPSG:4326', 'EPSG:900913'),
+            {
+                tooltip: 'Location',
+                angle: 0
+            }
+        )
+        overlay.addFeatures([marker])
+
+        _updatePosition()
 
     },
 
