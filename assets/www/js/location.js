@@ -116,6 +116,22 @@ pmap.Location.View = Backbone.View.extend({
                     )
                 }
 
+                if (self.position.coords.accuracy) {
+
+                    circle.move(
+                        new OpenLayers.LonLat(
+                            self.position.coords.longitude,
+                            self.position.coords.latitude
+                        )
+                        .transform('EPSG:4326', 'EPSG:900913')
+                    )
+
+                    circle.attributes.radius =
+                        self.position.coords.accuracy
+                        /circleLayer.map.getResolution()
+
+                }
+
                 if (self.position.coords.magneticHeading) {
                     marker.attributes.angle = self.position.coords.magneticHeading
                 }
@@ -127,19 +143,21 @@ pmap.Location.View = Backbone.View.extend({
 
         }
 
-        var overlay = new OpenLayers.Layer.Vector('Overlay', {
+        var markerLayer = new OpenLayers.Layer.Vector('Overlay', {
             styleMap: new OpenLayers.StyleMap({
-                externalGraphic: 'img/direction.png',
-                graphicWidth: 24,
-                graphicHeight: 24,
-                graphicXOffset: -12,
-                graphicYOffset: -12,
-                rotation: "${angle}",
-                title: 'current location'
+                "default": {
+                    externalGraphic: 'img/direction.png',
+                    graphicWidth: 24,
+                    graphicHeight: 24,
+                    graphicXOffset: -12,
+                    graphicYOffset: -12,
+                    rotation: "${angle}",
+                    title: 'current location'
+                }
             })
         })
 
-        self.app.findView("Map").map.addLayer(overlay)
+        self.app.findView("Map").map.addLayer(markerLayer)
 
         var marker = new OpenLayers.Feature.Vector(
             new OpenLayers.Geometry.Point(139.764772, 35.681610)
@@ -149,7 +167,32 @@ pmap.Location.View = Backbone.View.extend({
                 angle: 0
             }
         )
-        overlay.addFeatures([marker])
+        markerLayer.addFeatures([marker])
+
+        var circleLayer = new OpenLayers.Layer.Vector(
+            'Overlay',
+            {
+                styleMap: new OpenLayers.StyleMap({
+                    pointRadius: "${radius}",
+                    fillColor: "#0000FF",
+                    fillOpacity: 0.2,
+                    strokeColor: "#0000FF",
+                    strokeOpacity: 1,
+                    strokeWidth: 0.5
+                })
+            }
+        )
+
+        self.app.findView("Map").map.addLayer(circleLayer)
+
+        var circle = new OpenLayers.Feature.Vector(
+            new OpenLayers.Geometry.Point(139.764772, 35.681610)
+                .transform('EPSG:4326', 'EPSG:900913'),
+            {
+                radius: 44
+            }
+        )
+        circleLayer.addFeatures([circle])
 
         _updatePosition()
 
