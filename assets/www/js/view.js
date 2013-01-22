@@ -1,14 +1,14 @@
 pmap.View = Backbone.View.extend( {
 
-	defer: undefined,
+    defer: undefined,
 
-	initialize: function( data ) {
-		this.defer = $.Deferred()
-		this._initAsync( data )
-	},
+    initialize: function( data ) {
+        this.defer = $.Deferred()
+        this._initAsync( data )
+    },
 
-	_initAsync: function() {
-		this.defer.resolve()
-	}
+    _initAsync: function() {
+        this.defer.resolve()
+    }
 
 } )

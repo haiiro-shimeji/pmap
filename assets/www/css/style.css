@@ -1,14 +1,14 @@
 #map {
-	position: absolute;
-	left: 0;
-	top: 24px;
-	right: 0;
-	bottom: 0;
+    position: absolute;
+    left: 0;
+    top: 24px;
+    right: 0;
+    bottom: 0;
 }
 
 #debug {
-	position: absolute;
-	left: 0;
-	top: 0;
-	z-index: 65535;
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 65535;
 }

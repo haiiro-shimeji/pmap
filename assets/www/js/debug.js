@@ -2,11 +2,11 @@ pmap.Debug = {}
 
 pmap.Debug.View = Backbone.View.extend({
 
-	el: "#debug",
+    el: "#debug",
 
-	initialize: function() {
-		$("#map").append( ( this.$el = $("<div>").attr("id","debug") ) )
-	}
+    initialize: function() {
+        $("#map").append( ( this.$el = $("<div>").attr("id","debug") ) )
+    }
 
 } )
 

@@ -2,25 +2,25 @@ pmap.Location = {}
 
 pmap.Location.View = Backbone.View.extend({
 
-	el: "#location",
+    el: "#location",
 
     app: undefined,
 
-	position: { coords: {} },
+    position: { coords: {} },
 
     geolocationWatchId: undefined,
     compassWatchId: undefined,
 
-	initialize: function( data ) {
+    initialize: function( data ) {
 
-		var self = this
+        var self = this
 
         this.app = data.app
 
-		var debug = data.app.findView("Debug")
-		if ( debug ) {
-			debug.$el.append( ( this.$el = $("<div>").attr("id","location") ) )
-		}
+        var debug = data.app.findView("Debug")
+        if ( debug ) {
+            debug.$el.append( ( this.$el = $("<div>").attr("id","location") ) )
+        }
 
         $("#location_button").click(function() {
             if (!self.geolocationWatchId) {
@@ -30,48 +30,48 @@ pmap.Location.View = Backbone.View.extend({
             }
         })
 
-		this._debugPrintPosition()
+        this._debugPrintPosition()
 
-	},
+    },
 
-	_startWatch: function() {
+    _startWatch: function() {
 
-		var self = this
+        var self = this
 
         if (!this.geolocationWatchId) {
-    		this.geolocationWatchId = navigator.geolocation.watchPosition(
-    			function( position ) {
-    				$.map( position.coords, function( value, key ) {
-    					if ( null != value ) {
-    						self.position.coords[ key ] = value
-    					}
-    				} )
-    			},
-    			$.noop,
-    			{
-    				enableHighAccuracy: true,
-    				maximumAge: 3000, 
-    				timeout: 5000
-    			}
-    		)
+            this.geolocationWatchId = navigator.geolocation.watchPosition(
+                function( position ) {
+                    $.map( position.coords, function( value, key ) {
+                        if ( null != value ) {
+                            self.position.coords[ key ] = value
+                        }
+                    } )
+                },
+                $.noop,
+                {
+                    enableHighAccuracy: true,
+                    maximumAge: 3000, 
+                    timeout: 5000
+                }
+            )
         }
 
-		//	geolocation api does not always return heading.
-		//	But navigator.compass is not always defined (in device does not support it?).
-		if (!this.compassWatchId && navigator.compass) {
-			this.compassWatchId = navigator.compass.watchHeading(
-				function( heading ) {
-					$.each( heading, function( key, value ) {
-						return self.position.coords[ key ] = value
-					} )
-				},
-				$.noop
-			)
-		}
+        //    geolocation api does not always return heading.
+        //    But navigator.compass is not always defined (in device does not support it?).
+        if (!this.compassWatchId && navigator.compass) {
+            this.compassWatchId = navigator.compass.watchHeading(
+                function( heading ) {
+                    $.each( heading, function( key, value ) {
+                        return self.position.coords[ key ] = value
+                    } )
+                },
+                $.noop
+            )
+        }
 
         self._displayLocationalMarker()
 
-	},
+    },
 
     _stopWatch: function() {
 
@@ -198,31 +198,31 @@ pmap.Location.View = Backbone.View.extend({
 
     },
 
-	_debugPrintPosition: function() {
+    _debugPrintPosition: function() {
 
-		var self = this
+        var self = this
 
-		$.Deferred()
-		.resolve()
-		.pipe( function() {
-			return $.Deferred( function(defer) {
-				setTimeout( function() {
-					defer.resolve()
-				}, 1000 )
-			} )
-			.promise()
-		} )
-		.done( function() {
-			self.$el.html( $.map( self.position.coords, function( value, key ) {
-					return key + ": " + value
-				} )
-				.join( "<br/>" ) )
-		} )
-		.pipe( function() {
-			return self._debugPrintPosition()
-		} )
+        $.Deferred()
+        .resolve()
+        .pipe( function() {
+            return $.Deferred( function(defer) {
+                setTimeout( function() {
+                    defer.resolve()
+                }, 1000 )
+            } )
+            .promise()
+        } )
+        .done( function() {
+            self.$el.html( $.map( self.position.coords, function( value, key ) {
+                    return key + ": " + value
+                } )
+                .join( "<br/>" ) )
+        } )
+        .pipe( function() {
+            return self._debugPrintPosition()
+        } )
 
-	}
+    }
 
 })
 
