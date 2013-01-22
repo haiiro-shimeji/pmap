@@ -146,7 +146,7 @@ pmap.Location.View = Backbone.View.extend({
         var markerLayer = new OpenLayers.Layer.Vector('Overlay', {
             styleMap: new OpenLayers.StyleMap({
                 "default": {
-                    externalGraphic: 'img/direction.png',
+                    externalGraphic: 'images/direction.png',
                     graphicWidth: 24,
                     graphicHeight: 24,
                     graphicXOffset: -12,
