@@ -36,6 +36,21 @@
     border-style: none none none solid;
 }
 
+#header #menu {
+    position: absolute;
+    top: 40px;
+    right: 16px;
+    min-width: 100px;
+    background-color: #EEE;
+    z-index: 65535;
+}
+
+#header #menu > div {
+    padding: 4px;
+    border: 1px #999;
+    border-style: none none solid none;
+}
+
 #map {
     position: absolute;
     left: 0;

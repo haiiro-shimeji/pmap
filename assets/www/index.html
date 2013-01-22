@@ -21,6 +21,7 @@
         <script src="js/map.js"></script>
         <script src="js/debug.js"></script>
         <script src="js/location.js"></script>
+        <script src="js/menu.js"></script>
         <script src="js/stub.js"></script>
         <script type="text/javascript">
             $( function() {
@@ -35,7 +36,10 @@
                     <input type="search" placeholder="住所を入力" data-mini="true">
                 </form>
                 <div id="location_button">L</div>
-                <div id="menu_button">M</div>
+                <div id="menu_button">
+                    M
+                    <div id="menu"></div>
+                </div>
             </div>
             <div id="map">
                 <div id="location" style="position: absolute; z-index: 65535;"></div>
