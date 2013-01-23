@@ -11,7 +11,13 @@ pmap.Menu.View = Backbone.View.extend({
         var self = this
 
         self.$el
-        .append($("<div>").text("Add WMS"))
+        .append(
+            $("<div>")
+            .text("Add WMS")
+            .click(function() {
+                pmap.Application.getInstance().findView("Wms").$el.popup("open")
+            })
+        )
         .append($("<div>").text("Settings"))
         .hide()
 

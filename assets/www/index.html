@@ -22,6 +22,7 @@
         <script src="js/debug.js"></script>
         <script src="js/location.js"></script>
         <script src="js/menu.js"></script>
+        <script src="js/wms.js"></script>
         <script src="js/stub.js"></script>
         <script type="text/javascript">
             $( function() {
@@ -33,7 +34,7 @@
         <div data-role="page" id="main">
             <div id="header">
                 <form action='#' id="search_form">
-                    <input type="search" placeholder="住所を入力" data-mini="true">
+                    <input type="search" placeholder="input address.." data-mini="true">
                 </form>
                 <div id="location_button">L</div>
                 <div id="menu_button">
@@ -43,6 +44,14 @@
             </div>
             <div id="map">
                 <div id="location" style="position: absolute; z-index: 65535;"></div>
+            </div>
+            <div id="wms_popup" data-role="popup">
+                <form id="wms_form">
+                    WMS Cabability URL or WMS URL
+                    <input name="wms_url"/>
+                    <span class="error"></span>
+                    <input type="submit" value="Add"/>
+                </form>
             </div>
         </div>
     </body>
