@@ -53,27 +53,30 @@ pmap.AddLayer.View = Backbone.View.extend({
                     doc = request.responseText
                 }
                 var capabilities = format.read(doc)
-                var map = pmap.Application.getInstance().findView("Map").map
-                $.each(capabilities.capability.layers, function(i, layer) {
-                    map.addLayer(
-                        new OpenLayers.Layer.WMS(
-                            layer.title, 
-                            url,
-                            { layers: layer.name },
-                            { visibility: false }
+                if (!capabilities.error) {
+                    var map = pmap.Application.getInstance().findView("Map").map
+                    $.each(capabilities.capability.layers, function(i, layer) {
+                        map.addLayer(
+                            new OpenLayers.Layer.WMS(
+                                layer.title, 
+                                url,
+                                { layers: layer.name },
+                                { visibility: false }
+                            )
                         )
-                    )
-                })
+                    })
+                } else {
+                    alert("failed to parse the response.")
+                }
             },
             failure: function() {
                 alert("Trouble getting capabilities doc")
-                OpenLayers.Console.error.apply(OpenLayers.Console, arguments)
             }
         })
 
     },
 
-    _addAddLayer: function(url) {
+    _addWMS: function(url) {
         pmap.Application.getInstance().findView("Map").map.addLayer(
             new OpenLayers.Layer.WMS("New Layer", url)
         )        
