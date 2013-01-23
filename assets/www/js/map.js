@@ -22,6 +22,7 @@ pmap.Map.View = Backbone.View.extend({
         this.map.addControl(new OpenLayers.Control.Navigation({'zoomWheelEnabled': true}));
         this.map.addControl(new OpenLayers.Control.KeyboardDefaults());
         this.map.addControl(new OpenLayers.Control.TouchNavigation());
+        this.map.addControl(new OpenLayers.Control.LayerSwitcher())
 
         this.map.addLayer( new OpenLayers.Layer.OSM( "Simple OSM Map") );
 

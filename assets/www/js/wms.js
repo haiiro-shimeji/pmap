@@ -16,21 +16,11 @@ pmap.Wms.View = Backbone.View.extend({
 
             if (wmsUrl) {
 
-                if (wmsUrl.match(/request=([^&]+)/)) {
+                var request = RegExp.$1.toLowerCase()
 
-                    var request = RegExp.$1.toLowerCase()
+                self._addWmsCapability(wmsUrl)
 
-                    if ("getcapablity" == request) {
-                        self._addWmsCapability(wmsUrl)
-                    } else if ("getmap" == request) {
-                        self._addWms(wmsUrl)
-                    }
-
-                    self.$el.popup("close")
-
-                } else {
-                    $(".error",this).text("wms url does not include a valid request.")
-                }
+                self.$el.popup("close")
 
             } else {
                 $(".error",this).text("wms url must be input.")
@@ -44,6 +34,43 @@ pmap.Wms.View = Backbone.View.extend({
     },
 
     _addWmsCapability: function(url) {
+
+        var format = new OpenLayers.Format.WMSCapabilities({
+            yx: {
+                "urn:ogc:def:crs:EPSG::900913": true
+            }
+        })
+
+        OpenLayers.Request.GET({
+            url: url,
+            params: {
+                SERVICE: "WMS",
+                REQUEST: "GetCapabilities"
+            },
+            success: function(request) {
+                var doc = request.responseXML
+                if (!doc || !doc.documentElement) {
+                    doc = request.responseText
+                }
+                var capabilities = format.read(doc)
+                var map = pmap.Application.getInstance().findView("Map").map
+                $.each(capabilities.capability.layers, function(i, layer) {
+                    map.addLayer(
+                        new OpenLayers.Layer.WMS(
+                            layer.title, 
+                            url,
+                            { layers: layer.name },
+                            { visibility: false }
+                        )
+                    )
+                })
+            },
+            failure: function() {
+                alert("Trouble getting capabilities doc")
+                OpenLayers.Console.error.apply(OpenLayers.Console, arguments)
+            }
+        })
+
     },
 
     _addWms: function(url) {
