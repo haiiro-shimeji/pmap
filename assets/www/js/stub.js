@@ -28,4 +28,6 @@ if (  !( location.href == 'file:///android_asset/www/index.html' ) ) {
 
     }
 
+    OpenLayers.ProxyHost = "proxy.php/?url="
+
 }
