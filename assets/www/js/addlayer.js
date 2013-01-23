@@ -12,7 +12,7 @@ pmap.AddLayer.View = Backbone.View.extend({
             value: "wms_capabilities",
             form: [
                 $("<span>").text("WMS Capabilities URL"),
-                $("<input>").attr("name", "wms_capabilities_url")
+                $("<input>").attr("name", "wms_capabilities_url").textinput()
             ]
         },
         {
@@ -20,9 +20,9 @@ pmap.AddLayer.View = Backbone.View.extend({
             value: "wms",
             form: [
                 $("<span>").text("WMS URL"),
-                $("<input>").attr("name", "wms_url"),
+                $("<input>").attr("name", "wms_url").textinput(),
                 $("<span>").text("WMS Layers"),
-                $("<input>").attr("name", "wms_layers"),
+                $("<input>").attr("name", "wms_layers").textinput(),
                 $("<span>").text("please put the layer names which is sepalated by ','")
             ]
         }
@@ -55,7 +55,7 @@ pmap.AddLayer.View = Backbone.View.extend({
         })
 
         formatSelect.change(function() {
-            //self.$el.find(".add_layer_form_format").hide()
+            self.$el.find(".add_layer_form_format").hide()
             self.$el.find("#add_layer_form_"+$(this).val()).show()
         })
         .val(this.urlFormats[0].value)
