@@ -1,8 +1,8 @@
-pmap.Wms = {}
+pmap.AddLayer = {}
 
-pmap.Wms.View = Backbone.View.extend({
+pmap.AddLayer.View = Backbone.View.extend({
 
-    el: "#wms_popup",
+    el: "#add_layer_popup",
 
     open: undefined,
 
@@ -10,7 +10,7 @@ pmap.Wms.View = Backbone.View.extend({
 
         var self = this
 
-        $("#wms_form").submit(function() {
+        $("#add_layer_form").submit(function() {
 
             var wmsUrl = $("input[name=wms_url]",this).val()
 
@@ -18,7 +18,7 @@ pmap.Wms.View = Backbone.View.extend({
 
                 var request = RegExp.$1.toLowerCase()
 
-                self._addWmsCapability(wmsUrl)
+                self._addWMSCapability(wmsUrl)
 
                 self.$el.popup("close")
 
@@ -33,7 +33,7 @@ pmap.Wms.View = Backbone.View.extend({
 
     },
 
-    _addWmsCapability: function(url) {
+    _addWMSCapability: function(url) {
 
         var format = new OpenLayers.Format.WMSCapabilities({
             yx: {
@@ -73,7 +73,7 @@ pmap.Wms.View = Backbone.View.extend({
 
     },
 
-    _addWms: function(url) {
+    _addAddLayer: function(url) {
         pmap.Application.getInstance().findView("Map").map.addLayer(
             new OpenLayers.Layer.WMS("New Layer", url)
         )        
@@ -81,4 +81,4 @@ pmap.Wms.View = Backbone.View.extend({
 
 })
 
-pmap.Application.getInstance().addView( pmap.Wms.View, 101, "Wms" )
+pmap.Application.getInstance().addView( pmap.AddLayer.View, 101, "AddLayer" )

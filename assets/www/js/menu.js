@@ -13,9 +13,9 @@ pmap.Menu.View = Backbone.View.extend({
         self.$el
         .append(
             $("<div>")
-            .text("Add WMS")
+            .text("Add Layer")
             .click(function() {
-                pmap.Application.getInstance().findView("Wms").$el.popup("open")
+                pmap.Application.getInstance().findView("AddLayer").$el.popup("open")
             })
         )
         .append($("<div>").text("Settings"))
