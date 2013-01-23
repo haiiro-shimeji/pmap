@@ -6,22 +6,70 @@ pmap.AddLayer.View = Backbone.View.extend({
 
     open: undefined,
 
+    urlFormats: [
+        {
+            label: "WMS Capabilities",
+            value: "wms_capabilities",
+            form: [
+                $("<span>").text("WMS Capabilities URL"),
+                $("<input>").attr("name", "wms_capabilities_url")
+            ]
+        },
+        {
+            label: "Single WMS",
+            value: "wms",
+            form: [
+                $("<span>").text("WMS URL"),
+                $("<input>").attr("name", "wms_url"),
+                $("<span>").text("WMS Layers"),
+                $("<input>").attr("name", "wms_layers"),
+                $("<span>").text("please put the layer names which is sepalated by ','")
+            ]
+        }
+    ],
+
     initialize: function() {
 
         var self = this
+
+        var formatSelect = $("#add_layer_form select")
+
+        $.each(this.urlFormats, function(i, format) {
+
+            formatSelect.append(
+                $("<option>")
+                .val(format.value)
+                .text(format.label)
+                .data("form", format.form)
+            )
+
+            var div = $("<div>")
+                .addClass("add_layer_form_format")
+                .attr("id", "add_layer_form_"+format.value)
+            $.each(format.form, function(i, e) {
+                div.append(e)
+            })
+
+            $("#add_layer_form #add_layer_inputs").append(div)
+
+        })
+
+        formatSelect.change(function() {
+            //self.$el.find(".add_layer_form_format").hide()
+            self.$el.find("#add_layer_form_"+$(this).val()).show()
+        })
+        .val(this.urlFormats[0].value)
+        .change()
+
+        formatSelect.selectmenu("refresh")
 
         $("#add_layer_form").submit(function() {
 
             var wmsUrl = $("input[name=wms_url]",this).val()
 
             if (wmsUrl) {
-
-                var request = RegExp.$1.toLowerCase()
-
                 self._addWMSCapability(wmsUrl)
-
                 self.$el.popup("close")
-
             } else {
                 $(".error",this).text("wms url must be input.")
             }
