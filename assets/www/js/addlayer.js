@@ -63,12 +63,14 @@ pmap.AddLayer.View = Backbone.View.extend({
 
         formatSelect.selectmenu("refresh")
 
+        var map = pmap.Application.getInstance().findView("Map").map
+
         $("#add_layer_form").submit(function() {
 
             var wmsUrl = $("input[name=wms_url]",this).val()
 
             if (wmsUrl) {
-                self._addWMSCapability(wmsUrl)
+                self._addWMSCapability(map, wmsUrl)
                 self.$el.popup("close")
             } else {
                 $(".error",this).text("wms url must be input.")
@@ -81,7 +83,7 @@ pmap.AddLayer.View = Backbone.View.extend({
 
     },
 
-    _addWMSCapability: function(url) {
+    _addWMSCapability: function(map, url) {
 
         var format = new OpenLayers.Format.WMSCapabilities({
             yx: {
@@ -102,11 +104,10 @@ pmap.AddLayer.View = Backbone.View.extend({
                 }
                 var capabilities = format.read(doc)
                 if (!capabilities.error) {
-                    var map = pmap.Application.getInstance().findView("Map").map
                     $.each(capabilities.capability.layers, function(i, layer) {
                         map.addLayer(
                             new OpenLayers.Layer.WMS(
-                                layer.title, 
+                                layer.title,
                                 url,
                                 { layers: layer.name },
                                 { visibility: false }
@@ -124,10 +125,8 @@ pmap.AddLayer.View = Backbone.View.extend({
 
     },
 
-    _addWMS: function(url) {
-        pmap.Application.getInstance().findView("Map").map.addLayer(
-            new OpenLayers.Layer.WMS("New Layer", url)
-        )        
+    _addWMS: function(map, url) {
+        map.addLayer(new OpenLayers.Layer.WMS("New Layer", url))
     }
 
 })
