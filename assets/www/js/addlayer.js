@@ -6,6 +6,8 @@ pmap.AddLayer.View = Backbone.View.extend({
 
     open: undefined,
 
+    map: undefined,
+
     urlFormats: [
         {
             label: "WMS Capabilities",
@@ -28,7 +30,7 @@ pmap.AddLayer.View = Backbone.View.extend({
         }
     ],
 
-    initialize: function() {
+    render: function() {
 
         var self = this
 
@@ -63,65 +65,96 @@ pmap.AddLayer.View = Backbone.View.extend({
 
         formatSelect.selectmenu("refresh")
 
-        var map = pmap.Application.getInstance().findView("Map").map
-
         $("#add_layer_form").submit(function() {
 
-            var wmsUrl = $("input[name=wms_url]",this).val()
+            var format = $("select[name=url_format]",this).val()
+            var map = pmap.Application.getInstance().findView("Map").map
 
-            if (wmsUrl) {
-                self._addWMSCapability(map, wmsUrl)
-                self.$el.popup("close")
-            } else {
-                $(".error",this).text("wms url must be input.")
+            switch (format) {
+                case self.urlFormats[0].value: {  //wms_capabilities
+                    self._addWMSCapability(
+                        map, 
+                        $("input[name=wms_capabilities_url]",this).val()
+                    )
+                    self.$el.popup("close")
+                }
+                break;
+                default: {
+                    $(".error",this).text("wms url must be input.")
+                }
             }
 
             return false
 
         })
-        
+ 
+        return this    
 
     },
 
     _addWMSCapability: function(map, url) {
 
-        var format = new OpenLayers.Format.WMSCapabilities({
-            yx: {
-                "urn:ogc:def:crs:EPSG::900913": true
-            }
-        })
+        var self = this
 
-        OpenLayers.Request.GET({
-            url: url,
-            params: {
-                SERVICE: "WMS",
-                REQUEST: "GetCapabilities"
-            },
-            success: function(request) {
-                var doc = request.responseXML
-                if (!doc || !doc.documentElement) {
-                    doc = request.responseText
-                }
-                var capabilities = format.read(doc)
-                if (!capabilities.error) {
-                    $.each(capabilities.capability.layers, function(i, layer) {
-                        map.addLayer(
-                            new OpenLayers.Layer.WMS(
-                                layer.title,
-                                url,
-                                { layers: layer.name },
-                                { visibility: false }
-                            )
-                        )
-                    })
-                } else {
-                    alert("failed to parse the response.")
-                }
-            },
-            failure: function() {
-                alert("Trouble getting capabilities doc")
-            }
-        })
+        return $.Deferred()
+            .resolve()
+            .pipe(function () {
+
+                var defer = $.Deferred()
+
+                var format = new OpenLayers.Format.WMSCapabilities({
+                    yx: {
+                        "urn:ogc:def:crs:EPSG::900913": true
+                    }
+                })
+
+                OpenLayers.Request.GET({
+                    url: url,
+                    params: {
+                        SERVICE: "WMS",
+                        REQUEST: "GetCapabilities"
+                    },
+                    success: function (request) {
+                        var doc = request.responseXML
+                        if (!doc || !doc.documentElement) {
+                            doc = request.responseText
+                        }
+                        defer.resolve( format.read(doc) )
+                    },
+                    failure: function () {
+                        defer.reject("Failed to get capabilities doc.")
+                    }
+                })
+
+                return defer.promise()
+
+            })
+            .pipe(function (capabilities) {
+                return self.__addCapabilities(map, capabilities)            
+            })
+
+    },
+
+    __addCapabilities: function(map, capabilities) {
+
+        if (!capabilities.error) {
+
+            $.each(capabilities.capability.layers, function(i, layer) {
+                map.addLayer(
+                    new OpenLayers.Layer.WMS(
+                        layer.title,
+                        capabilities.service.href,
+                        { layers: layer.name },
+                        { visibility: false }
+                    )
+                )
+            })
+
+            return $.Deferred().resolve()
+
+        } else {
+            return $.Deferred().reject("failed to parse the response.")
+        }
 
     },
 

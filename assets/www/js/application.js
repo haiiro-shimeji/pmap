@@ -59,6 +59,7 @@ pmap.Application.prototype.init = function() {
         $.each( viewClassesInPriority, function( i, obj ) {
             piped = piped.pipe( function() {
                 var instance = ( new ( obj.view )( { app: self } ) )
+                instance.render()
                 if ( obj.tag ) {
                     self.viewInstances[ obj.tag ] = instance
                 }
