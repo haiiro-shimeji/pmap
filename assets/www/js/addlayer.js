@@ -48,6 +48,9 @@ pmap.AddLayer.View = Backbone.View.extend({
 
             if (pmap.AddLayer.Formats[format]) {
                 pmap.AddLayer.Formats[format].callback(map, this)
+                .fail(function(message) {
+                    alert(message)
+                })
                 self.$el.popup("close")
             } else {
                 $(".error",this).text("wms url must be input.")
@@ -65,9 +68,52 @@ pmap.AddLayer.View = Backbone.View.extend({
 
 pmap.Application.getInstance().addView( pmap.AddLayer.View, 101, "AddLayer" )
 
+pmap.AddLayer.CapabilitiesFormatBase = {
+    _getCapabilities: function(url, format, param) {
+
+        var _request = function() {
+
+            var defer = $.Deferred()
+
+            OpenLayers.Request.GET({
+                url: url,
+                params: param,
+                success: function (request) {
+                    var doc = request.responseXML
+                    if (!doc || !doc.documentElement) {
+                        doc = request.responseText
+                    }
+                    defer.resolve( format.read(doc) )
+                },
+                failure: function () {
+                    defer.reject("Failed to get capabilities doc.")
+                }
+            })
+
+            return defer.promise()
+
+        }
+
+        return $.Deferred()
+            .resolve()
+            .pipe( function() {
+                return _request()
+            } )
+            .pipe( function(capabilities) {
+                if (capabilities.error && capabilities.error.version && !param.VERSION) {
+                    param.VERSION = capabilities.error.version
+                    return _request()
+                } else {
+                    return $.Deferred.resolve(capabilities)
+                }
+            } )
+
+    }
+}
+
 pmap.AddLayer.Formats = {
 
-    "wms_capabilities": {
+    "wms_capabilities": $.extend( {
         label: "WMS Capabilities",
         form: [
             $("<span>").text("WMS Capabilities URL"),
@@ -82,35 +128,18 @@ pmap.AddLayer.Formats = {
             return $.Deferred()
                 .resolve()
                 .pipe(function () {
-
-                    var defer = $.Deferred()
-
-                    var format = new OpenLayers.Format.WMSCapabilities({
-                        yx: {
-                            "urn:ogc:def:crs:EPSG::900913": true
-                        }
-                    })
-
-                    OpenLayers.Request.GET({
-                        url: url,
-                        params: {
+                    return self._getCapabilities(
+                        url,
+                        new OpenLayers.Format.WMSCapabilities({
+                            yx: {
+                                "urn:ogc:def:crs:EPSG::900913": true
+                            }
+                        }),
+                        {
                             SERVICE: "WMS",
                             REQUEST: "GetCapabilities"
-                        },
-                        success: function (request) {
-                            var doc = request.responseXML
-                            if (!doc || !doc.documentElement) {
-                                doc = request.responseText
-                            }
-                            defer.resolve( format.read(doc) )
-                        },
-                        failure: function () {
-                            defer.reject("Failed to get capabilities doc.")
                         }
-                    })
-
-                    return defer.promise()
-
+                    )
                 })
                 .pipe(function (capabilities) {
                     return self._addCapabilities(map, capabilities)            
@@ -140,7 +169,7 @@ pmap.AddLayer.Formats = {
             }
 
         }
-    },
+    }, pmap.AddLayer.CapabilitiesFormatBase),
 
     "wms": {
         label: "Single WMS",
@@ -161,6 +190,62 @@ pmap.AddLayer.Formats = {
                 LAYERS: layers
             }))
         }
-    }
+    },
+
+    "wfs_capabilities": $.extend({
+        label: "WFS Capabilities",
+        form: [
+            $("<span>").text("WFS Capabilities URL"),
+            $("<input>").attr("name", "wfs_capabilities_url").textinput()
+        ],
+        callback: function(map, form) {
+
+            var url = $("input[name=wfs_capabilities_url]",form).val()
+
+            var self = this
+
+            return $.Deferred()
+                .resolve()
+                .pipe(function () {
+                    return self._getCapabilities(
+                        url,
+                        new OpenLayers.Format.WFSCapabilities({
+                            yx: {
+                                "urn:ogc:def:crs:EPSG::900913": true
+                            }
+                        }),
+                        {
+                            SERVICE: "WFS",
+                            REQUEST: "GetCapabilities"
+                        }
+                    )
+                })
+                .pipe(function (capabilities) {
+                    return self._addCapabilities(map, capabilities)            
+                })
+
+        },
+
+        _addCapabilities: function(map, capabilities) {
+            if (!capabilities.error) {
+
+                $.each(capabilities.featureTypeList, function(i, featureType) {
+                    new OpenLayers.Layer.Vector("WFS", {
+                        strategies: [new OpenLayers.Strategy.BBOX()],
+                        protocol: new OpenLayers.Protocol.WFS({
+                            url: capabilities.service.href,
+                            featureType: featureType.name
+                        })
+                    })
+                })
+
+                return $.Deferred().resolve()
+
+            } else {
+                return $.Deferred().reject("Failed to parse response.")
+            }
+        }
+
+    }, pmap.AddLayer.CapabilitiesFormatBase)
 
 }
