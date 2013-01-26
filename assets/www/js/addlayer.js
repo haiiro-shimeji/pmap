@@ -51,10 +51,11 @@ pmap.AddLayer.View = Backbone.View.extend({
                 .fail(function(message) {
                     alert(message)
                 })
-                self.$el.popup("close")
             } else {
-                $(".error",this).text("wms url must be input.")
+                alert("Invalid format is selected (programing error).")
             }
+
+            self.$el.popup("close")
 
             return false
 

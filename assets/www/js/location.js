@@ -126,14 +126,14 @@ pmap.Location.View = Backbone.View.extend({
                         .transform('EPSG:4326', 'EPSG:900913')
                     )
 
-                    circle.attributes.radius =
+                    circle.style.pointRadius =
                         self.position.coords.accuracy
-                        /circleLayer.map.getResolution()
+                        /locationLayer.map.getResolution()
 
                 }
 
                 if (self.position.coords.magneticHeading) {
-                    marker.attributes.angle = self.position.coords.magneticHeading
+                    marker.style.rotation = self.position.coords.magneticHeading
                 }
 
             })
@@ -143,56 +143,43 @@ pmap.Location.View = Backbone.View.extend({
 
         }
 
-        var markerLayer = new OpenLayers.Layer.Vector('Overlay', {
-            styleMap: new OpenLayers.StyleMap({
-                "default": {
-                    externalGraphic: 'images/direction.png',
-                    graphicWidth: 24,
-                    graphicHeight: 24,
-                    graphicXOffset: -12,
-                    graphicYOffset: -12,
-                    rotation: "${angle}",
-                    title: 'current location'
-                }
-            })
-        })
+        var locationLayer = new OpenLayers.Layer.Vector('Location')
 
-        pmap.Map.getInstance().addLayer(markerLayer)
+        pmap.Map.getInstance().addLayer(locationLayer)
 
         var marker = new OpenLayers.Feature.Vector(
             new OpenLayers.Geometry.Point(139.764772, 35.681610)
                 .transform('EPSG:4326', 'EPSG:900913'),
             {
                 tooltip: 'Location',
-                angle: 0
-            }
-        )
-        markerLayer.addFeatures([marker])
-
-        var circleLayer = new OpenLayers.Layer.Vector(
-            'Overlay',
+            },
             {
-                styleMap: new OpenLayers.StyleMap({
-                    pointRadius: "${radius}",
-                    fillColor: "#0000FF",
-                    fillOpacity: 0.2,
-                    strokeColor: "#0000FF",
-                    strokeOpacity: 1,
-                    strokeWidth: 0.5
-                })
+                externalGraphic: 'images/direction.png',
+                graphicWidth: 24,
+                graphicHeight: 24,
+                graphicXOffset: -12,
+                graphicYOffset: -12,
+                rotation: 0,
+                title: 'current location'
             }
         )
-
-        pmap.Map.getInstance().addLayer(circleLayer)
+        locationLayer.addFeatures([marker])
 
         var circle = new OpenLayers.Feature.Vector(
             new OpenLayers.Geometry.Point(139.764772, 35.681610)
                 .transform('EPSG:4326', 'EPSG:900913'),
             {
                 radius: 44
+            },
+            {
+                fillColor: "#0000FF",
+                fillOpacity: 0.2,
+                strokeColor: "#0000FF",
+                strokeOpacity: 1,
+                strokeWidth: 0.5
             }
         )
-        circleLayer.addFeatures([circle])
+        locationLayer.addFeatures([circle])
 
         _updatePosition()
 

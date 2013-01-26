@@ -56,10 +56,48 @@ pmap.Map.prototype = {
                 ), 12
             )
 
+        this.olMap.addLayer(new OpenLayers.Layer.Vector('LocalFeatures'))
+
     },
 
-    addLayer: function(layer) {
+    addLayer: function (layer) {
         this.olMap.addLayer(layer)
+    },
+
+    //@TODO iconUrl -> LocalFeatureType Object
+    addLocalFeature: function (iconUrl, pixelX, pixelY) {
+
+        try {
+            var localFeatureLayer = Enumerable.from( this.olMap.layers )
+                .where( function(x) {return 'LocalFeatures' == x.name} )
+                .first()
+
+            var lonlat = this.olMap.getLonLatFromPixel({
+                x: pixelX,
+                y: pixelY
+            })
+
+            var marker = new OpenLayers.Feature.Vector(
+                new OpenLayers.Geometry.Point(lonlat.lon, lonlat.lat),
+                {
+                    tooltip: 'feature',
+                },
+                {
+                    externalGraphic: iconUrl,
+                    graphicWidth: 32,
+                    graphicHeight: 32,
+                    graphicXOffset: -16,
+                    graphicYOffset: -16,
+                    rotation: 0,
+                    title: 'feature'
+                }
+            )
+            localFeatureLayer.addFeatures([marker])
+
+        } catch (e) {
+            alert("Local feature layer is not found.")
+        }
+
     }
 
 }

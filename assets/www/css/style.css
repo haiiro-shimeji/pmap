@@ -63,6 +63,15 @@ body {
     bottom: 0;
 }
 
+#add_feature_panel {
+    position: absolute;
+    background-color: #FFF;
+    left: 32px;
+    bottom: 0px;
+    width: 64px;
+    height: 200px;
+}
+
 #debug {
     position: absolute;
     left: 0;
