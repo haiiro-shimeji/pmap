@@ -157,7 +157,7 @@ pmap.Location.View = Backbone.View.extend({
             })
         })
 
-        self.app.findView("Map").map.addLayer(markerLayer)
+        pmap.Map.getInstance().addLayer(markerLayer)
 
         var marker = new OpenLayers.Feature.Vector(
             new OpenLayers.Geometry.Point(139.764772, 35.681610)
@@ -183,7 +183,7 @@ pmap.Location.View = Backbone.View.extend({
             }
         )
 
-        self.app.findView("Map").map.addLayer(circleLayer)
+        pmap.Map.getInstance().addLayer(circleLayer)
 
         var circle = new OpenLayers.Feature.Vector(
             new OpenLayers.Geometry.Point(139.764772, 35.681610)

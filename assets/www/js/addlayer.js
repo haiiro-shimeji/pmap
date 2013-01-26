@@ -44,7 +44,7 @@ pmap.AddLayer.View = Backbone.View.extend({
         $("#add_layer_form").submit(function() {
 
             var format = $("select[name=url_format]",this).val()
-            var map = pmap.Application.getInstance().findView("Map").map
+            var map = pmap.Map.getInstance()
 
             if (pmap.AddLayer.Formats[format]) {
                 pmap.AddLayer.Formats[format].callback(map, this)
@@ -60,7 +60,7 @@ pmap.AddLayer.View = Backbone.View.extend({
 
         })
  
-        return this    
+        return this
 
     }
 
@@ -104,7 +104,7 @@ pmap.AddLayer.CapabilitiesFormatBase = {
                     param.VERSION = capabilities.error.version
                     return _request()
                 } else {
-                    return $.Deferred.resolve(capabilities)
+                    return $.Deferred().resolve(capabilities)
                 }
             } )
 

@@ -2,12 +2,33 @@ pmap.Map = {}
 
 pmap.Map.View = Backbone.View.extend({
 
-    app: undefined,
-    map: undefined,
+    render: function() {
+        pmap.Map.getInstance().init()
+        return this
+    }
 
-    initialize: function( data ) {
+} )
+pmap.Application.getInstance().addView( pmap.Map.View, 100, "Map" )
 
-        this.map = new OpenLayers.Map( {
+pmap.Map = function () {
+}
+
+pmap.Map.instance = undefined
+
+pmap.Map.getInstance = function () {
+    if (!pmap.Map.instance) {
+        pmap.Map.instance = new pmap.Map()
+    }
+    return pmap.Map.instance
+}
+
+pmap.Map.prototype = {
+
+    olMap: undefined,
+
+    init: function() {
+
+        this.olMap = new OpenLayers.Map( {
             div: "map",
             allOverlays: true,
             maxResolution : 156543.0339,
@@ -17,23 +38,28 @@ pmap.Map.View = Backbone.View.extend({
             units: "m",
             maxExtent: new OpenLayers.Bounds(-20037508.34, -20037508.34, 20037508.34, 20037508.34),
             controls: []
-        } );
-        this.map.addControl(new OpenLayers.Control.Zoom());
-        this.map.addControl(new OpenLayers.Control.Navigation({'zoomWheelEnabled': true}));
-        this.map.addControl(new OpenLayers.Control.KeyboardDefaults());
-        this.map.addControl(new OpenLayers.Control.TouchNavigation());
-        this.map.addControl(new OpenLayers.Control.LayerSwitcher())
+        } )
+        this.olMap.addControl(new OpenLayers.Control.Zoom())
+        this.olMap.addControl(new OpenLayers.Control.Navigation({
+            'zoomWheelEnabled': true
+        }))
+        this.olMap.addControl(new OpenLayers.Control.KeyboardDefaults())
+        this.olMap.addControl(new OpenLayers.Control.TouchNavigation())
+        this.olMap.addControl(new OpenLayers.Control.LayerSwitcher())
 
-        this.map.addLayer( new OpenLayers.Layer.OSM( "Simple OSM Map") );
+        this.olMap.addLayer( new OpenLayers.Layer.OSM( "Simple OSM Map") )
 
-        this.map.setCenter(
+        this.olMap.setCenter(
             new OpenLayers.LonLat( 139.764772, 35.681610 ).transform(
                 new OpenLayers.Projection("EPSG:4326"),
-                this.map.getProjectionObject()
+                this.olMap.getProjectionObject()
                 ), 12
-            );    
+            )
 
+    },
+
+    addLayer: function(layer) {
+        this.olMap.addLayer(layer)
     }
 
-} )
-pmap.Application.getInstance().addView( pmap.Map.View, 100, "Map" )
+}
