@@ -51,11 +51,21 @@ pmap.DrawPath.View = Backbone.View.extend({
             }
         })
         .mousemove(function (e) {
-            if (self.toggled && drawing ) {
-                points.push({
-                    x: e.pageX - mapOffset.left,
-                    y: e.pageY - mapOffset.top
-                })
+            if (self.toggled && drawing) {
+                var v2 = {
+                        x: e.pageX - mapOffset.left,
+                        y: e.pageY - mapOffset.top
+                    },
+                    v1 = points[points.length-1]
+
+                if (3 > points.length) {
+                    points.push(v2)
+                } else {
+                    var v0 = points[points.length-2]
+                    if (0 != (v1.x-v0.x) * (v2.y-v1.y) - (v2.x-v1.x) * (v1.y-v0.y)) {
+                        points.push(v2)
+                    }
+                }
             }
         })
         .mouseup(function (e) {
