@@ -98,6 +98,39 @@ pmap.Map.prototype = {
             alert("Local feature layer is not found.")
         }
 
+    },
+
+    addLocalPath: function (localFeatureType, points) {
+
+        var self = this
+
+        try {
+            if ( 0 < points.length ) {
+
+                var localFeatureLayer = Enumerable.from( this.olMap.layers )
+                    .where( function(x) {return 'LocalFeatures' == x.name} )
+                    .first()
+
+                points = $.map( points, function( point ) {
+                    var lonlat = self.olMap.getLonLatFromPixel({
+                        x: point.x,
+                        y: point.y
+                    })
+                    return new OpenLayers.Geometry.Point(lonlat.lon, lonlat.lat)
+                } )
+
+                localFeatureLayer.addFeatures([
+                    new OpenLayers.Feature.Vector(
+                        new OpenLayers.Geometry.LineString( points ),
+                        { tooltip: "feature" }
+                    )
+                ])
+
+            }
+        } catch(e) {
+            alert("Local feature layer is not found.")
+        }
+
     }
 
 }
