@@ -21,41 +21,50 @@ pmap.DrawPath.View = Backbone.View.extend({
 
         var pathBuilder = new pmap.DrawPath.PathBuilder
 
+        var slider = undefined
+
         this.$el.click(function() {
             if (!self.toggled) {
                 $.each(navigations, function(i, c) {
                     c.deactivate()
                 })
-                $("#main").append(
-                    $("<div>").slider()
-                )
+                slider = new pmap.DrawPath.LineWidthSlider
+                slider.render()
                 self.toggled = true
             } else {
                 $.each(navigations, function(i, c) {
                     c.activate()
                 })
                 pathBuilder.stop()
+                slider.$el.remove()
+                slider = undefined
                 self.toggled = false
             }
         })
 
         $("#map")
-        .mousedown(function (e) {
+        .bind("vmousedown", function (e) {
             if (self.toggled) {
                 pathBuilder.start()
                 pathBuilder.addPoint(e)
             }
         })
-        .mousemove(function (e) {
+        .bind("vmousemove", function (e) {
             if (self.toggled) {
                 pathBuilder.addPoint(e)
             }
         })
-        .bind("mouseup mouseleave", function (e) {
+        .bind("vmouseup vmouseout", function (e) {
             if (self.toggled) {
                 pathBuilder.addPoint(e)
                 if (pathBuilder.drawing) {
-                    pmap.Map.getInstance().addLocalPath(null, pathBuilder.points)
+                    pmap.Map.getInstance().addLocalPath(
+                        null,
+                        pathBuilder.points,
+                        {
+                            strokeWidth: slider.value()
+                        }
+                    )
                     pathBuilder.stop()
                 }
             }
@@ -122,3 +131,38 @@ pmap.DrawPath.PathBuilder.prototype = {
     }
 
 }
+
+pmap.DrawPath.LineWidthSlider = Backbone.View.extend({
+
+    slider: undefined,
+
+    render: function() {
+
+        this.slider = $("<input>")
+            .attr("id", "linewidth_slider")
+            .attr("value", 1)
+            .attr("min", 1)
+            .attr("max", 20)
+
+        this.$el = $("<div>")
+            .css({
+                position: "absolute",
+                left: "128px",
+                right: "16px",
+                bottom: "16px",
+                height: "44px"
+            })
+            .append(this.slider)
+
+        $("#main").append(this.$el)
+        this.slider.slider()
+
+        return this
+
+    },
+
+    value: function () {
+        return this.slider.val()
+    }
+
+})

@@ -100,7 +100,7 @@ pmap.Map.prototype = {
 
     },
 
-    addLocalPath: function (localFeatureType, points) {
+    addLocalPath: function (localFeatureType, points, style) {
 
         var self = this
 
@@ -122,7 +122,8 @@ pmap.Map.prototype = {
                 localFeatureLayer.addFeatures([
                     new OpenLayers.Feature.Vector(
                         new OpenLayers.Geometry.LineString( points ),
-                        { tooltip: "feature" }
+                        { tooltip: "feature" },
+                        style
                     )
                 ])
 
