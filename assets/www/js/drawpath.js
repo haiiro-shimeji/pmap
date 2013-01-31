@@ -19,18 +19,62 @@ pmap.DrawPath.View = Backbone.View.extend({
             .select()
             .toArray()
 
+        var mapOffset = $("#map").offset()
+
+        var _makePoint = function(e) {
+            return {
+                x: e.pageX - mapOffset.left,
+                y: e.pageY - mapOffset.top
+            }
+        }
+
         var pathBuilder = new pmap.DrawPath.PathBuilder
 
         var slider = undefined
+        var canvas = undefined
 
         this.$el.click(function() {
+
             if (!self.toggled) {
+
                 $.each(navigations, function(i, c) {
                     c.deactivate()
                 })
                 slider = new pmap.DrawPath.LineWidthSlider
                 slider.render()
+                canvas = new pmap.DrawPath.Canvas
+                canvas.render()
                 self.toggled = true
+
+                canvas.$el
+                .bind("vmousedown", function (e) {
+                    var newPoint = _makePoint(e)
+                    pathBuilder.start()
+                    pathBuilder.addPoint(newPoint)
+                    canvas.startPath(newPoint)
+                })
+                .bind("vmousemove", function (e) {
+                    if (pathBuilder.drawing) {
+                        var newPoint = _makePoint(e)
+                        pathBuilder.addPoint(newPoint)
+                        canvas.lineTo(newPoint)
+                    }
+                })
+                .bind("vmouseup vmouseout", function (e) {
+                    if (pathBuilder.drawing) {
+                        pathBuilder.addPoint(_makePoint(e))
+                        pmap.Map.getInstance().addLocalPath(
+                            null,
+                            pathBuilder.points,
+                            {
+                                strokeWidth: slider.value()
+                            }
+                        )
+                        pathBuilder.stop()
+                        canvas.clearPath()
+                    }
+                })
+
             } else {
                 $.each(navigations, function(i, c) {
                     c.activate()
@@ -38,36 +82,11 @@ pmap.DrawPath.View = Backbone.View.extend({
                 pathBuilder.stop()
                 slider.$el.remove()
                 slider = undefined
+                canvas.$el.remove()
+                canvas = undefined
                 self.toggled = false
             }
-        })
 
-        $("#map")
-        .bind("vmousedown", function (e) {
-            if (self.toggled) {
-                pathBuilder.start()
-                pathBuilder.addPoint(e)
-            }
-        })
-        .bind("vmousemove", function (e) {
-            if (self.toggled) {
-                pathBuilder.addPoint(e)
-            }
-        })
-        .bind("vmouseup vmouseout", function (e) {
-            if (self.toggled) {
-                pathBuilder.addPoint(e)
-                if (pathBuilder.drawing) {
-                    pmap.Map.getInstance().addLocalPath(
-                        null,
-                        pathBuilder.points,
-                        {
-                            strokeWidth: slider.value()
-                        }
-                    )
-                    pathBuilder.stop()
-                }
-            }
         })
 
         return this
@@ -92,23 +111,12 @@ pmap.DrawPath.checkLinearExtended = function (points, newPoint) {
 
 }
 
-pmap.DrawPath.PathBuilder = function () {
-    this.mapOffset = $("#map").offset()
-}
+pmap.DrawPath.PathBuilder = function () {}
 
 pmap.DrawPath.PathBuilder.prototype = {
 
     drawing: false,
     points: undefined,
-
-    mapOffset: undefined,
-
-    _makePoint: function(e) {
-        return {
-            x: e.pageX - this.mapOffset.left,
-            y: e.pageY - this.mapOffset.top
-        }
-    },
 
     start: function () {
         this.drawing = true
@@ -119,9 +127,8 @@ pmap.DrawPath.PathBuilder.prototype = {
         this.drawing = false
     },
 
-    addPoint: function (e) {
+    addPoint: function (newPoint) {
         if (this.drawing) {
-            var newPoint = this._makePoint(e)
             if (!pmap.DrawPath.checkLinearExtended(this.points, newPoint)) {
                 this.points.push(newPoint)
             } else {
@@ -163,6 +170,45 @@ pmap.DrawPath.LineWidthSlider = Backbone.View.extend({
 
     value: function () {
         return this.slider.val()
+    }
+
+})
+
+pmap.DrawPath.Canvas = Backbone.View.extend({
+
+    currentContext: undefined,
+
+    render: function () {
+
+        var mapOffset = $("#map").offset(),
+            mapWidth = $("#map").width(), mapHeight = $("#map").height()
+
+        this.$el = $("<canvas>")
+            .attr("width", mapWidth)
+            .attr("height", mapHeight)
+            .css({
+                position: "absolute",
+                left: mapOffset.left,
+                top: mapOffset.top,
+                width: mapWidth,
+                height: mapHeight
+            })
+
+        $("#main").append(this.$el)
+
+        return this
+
+    },
+
+    startPath: function(newPoint) {
+        this.currentContext = this.$el.get(0).getContext('2d')
+        this.currentContext.beginPath()
+        this.currentContext.moveTo(newPoint.x, newPoint.y)
+    },
+
+    lineTo: function(newPoint) {
+        this.currentContext.lineTo(newPoint.x, newPoint.y)
+        this.currentContext.stroke()
     }
 
 })

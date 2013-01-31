@@ -38,9 +38,9 @@ test("pmap.DrawPath.PathBuilder", function () {
 
     (function() {
         var points = [
-                { pageX: 1, pageY: 1 },
-                { pageX: 2, pageY: 4 },
-                { pageX: 3, pageY: 8 }
+                { x: 1, y: 1 },
+                { x: 2, y: 4 },
+                { x: 3, y: 8 }
             ]
         var instance = new pmap.DrawPath.PathBuilder
         instance.mapOffset = { left: 0, top: 0 }
@@ -64,9 +64,9 @@ test("pmap.DrawPath.PathBuilder", function () {
     //  confirm lineal extended check
     ;(function() {
         var points = [
-                { pageX: 1, pageY: 1 },
-                { pageX: 2, pageY: 4 },
-                { pageX: 3, pageY: 7 }
+                { x: 1, y: 1 },
+                { x: 2, y: 4 },
+                { x: 3, y: 7 }
             ]
         var instance = new pmap.DrawPath.PathBuilder
         instance.mapOffset = { left: 0, top: 0 }

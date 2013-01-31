@@ -70,6 +70,7 @@ body {
     bottom: 0px;
     width: 64px;
     height: 200px;
+    z-index: 65535;
 }
 
 #debug {
