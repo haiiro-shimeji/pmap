@@ -6,6 +6,12 @@ pmap.AddLayer.View = Backbone.View.extend({
 
     open: undefined,
 
+    urlCache: undefined,
+
+    initialize: function() {
+        this.urlCache = new pmap.AddLayer.UrlCache
+    },
+
     render: function() {
 
         var self = this
@@ -41,13 +47,47 @@ pmap.AddLayer.View = Backbone.View.extend({
 
         formatSelect.selectmenu("refresh")
 
+        var map = pmap.Map.getInstance()
+        var cache = this.urlCache.cache()
+
+        if (0 < cache.length) {
+
+            var hist = $("#add_layer_history")
+            hist.append($("<span>").text("History"))
+
+            var list = $("<ul>")
+            hist.append(list)
+
+            $.each(cache, function(i, c) {
+                list.append(
+                    $("<li>")
+                    .append(
+                        $("<a>")
+                        .attr("href", "#")
+                        .text(c.name)
+                        .click(function() {
+                            self.$el.popup("close")
+                            pmap.AddLayer.Formats[c.format]
+                            .callback(map, c, self.urlCache)
+                            .fail(function (message) {
+                                alert(message)
+                            })
+                        })
+                    )
+                )
+            })
+
+            list.listview({ inset: true })
+
+        }
+
         $("#add_layer_form").submit(function() {
 
             var format = $("select[name=url_format]",this).val()
-            var map = pmap.Map.getInstance()
 
             if (pmap.AddLayer.Formats[format]) {
-                pmap.AddLayer.Formats[format].callback(map, this)
+                var args = pmap.AddLayer.Formats[format].getArgs(this)
+                pmap.AddLayer.Formats[format].callback(map, args)
                 .fail(function(message) {
                     alert(message)
                 })
@@ -68,6 +108,33 @@ pmap.AddLayer.View = Backbone.View.extend({
 })
 
 pmap.Application.getInstance().addView( pmap.AddLayer.View, 101, "AddLayer" )
+
+
+pmap.AddLayer.UrlCache = function() {
+    this.storage = new pmap.CookieStorage
+}
+
+pmap.AddLayer.UrlCache.LIMIT = 5
+
+pmap.AddLayer.UrlCache.prototype = {
+
+    storage: undefined,
+
+    addCache: function(format, name, args) {
+        caches = this.storage.get("variables", "layer_caches") || []
+        caches.push($.extend({ format: format, name: name }, args))
+        while (pmap.AddLayer.UrlCache.LIMIT < caches.length) {
+            caches.shift()
+        }
+        this.storage.set("variables", "layer_caches", caches)
+    },
+
+    cache: function() {
+        return this.storage.get("variables", "layer_caches") || []
+    }
+
+}
+
 
 pmap.AddLayer.CapabilitiesFormatBase = {
     _getCapabilities: function(url, format, param) {
@@ -120,9 +187,14 @@ pmap.AddLayer.Formats = {
             $("<span>").text("WMS Capabilities URL"),
             $("<input>").attr("name", "wms_capabilities_url").textinput()
         ],
-        callback: function(map, form) {
+        getArgs: function(form) {
+            return {
+                url: $("input[name=wms_capabilities_url]",form).val()
+            }
+        },
+        callback: function(map, args, urlCache) {
 
-            var url = $("input[name=wms_capabilities_url]",form).val()
+            var url = args.url
 
             var self = this
 
@@ -141,6 +213,11 @@ pmap.AddLayer.Formats = {
                             REQUEST: "GetCapabilities"
                         }
                     )
+                })
+                .done(function (capabilities) {
+                    if (urlCache) {
+                        urlCache.addCache("wms_capabilities", capabilities.service.title, {url: url})
+                    }
                 })
                 .pipe(function (capabilities) {
                     return self._addCapabilities(map, capabilities)            
@@ -183,13 +260,27 @@ pmap.AddLayer.Formats = {
             $("<input>").attr("name", "wms_layers").textinput(),
             $("<span>").text("please put the layer names which is sepalated by ','")
         ],
-        callback: function(map, form) {
-            var url = $("input[name=wms_url]",form).val()
-            var layers = $("input[name=wms_layers]",form).val()
-            var name = $("input[name=wms_name]",form).val() || "New Layer"
+        getArgs: function(form) {
+            return {
+                url: $("input[name=wms_url]",form).val(),
+                layers: $("input[name=wms_layers]",form).val(),
+                name: $("input[name=wms_name]",form).val() || "New Layer"
+            }
+        },
+        callback: function(map, args, urlCache) {
+            var url = args.url
+            var layers = args.layers
+            var name = args.name
             map.addLayer(new OpenLayers.Layer.WMS(name, url, {
                 LAYERS: layers
             }))
+            if (urlCache) {
+                urlCache.addCache("wms", name, {
+                    url: url,
+                    layers: layers,
+                    name: name
+                })
+            }
         }
     },
 
@@ -199,9 +290,14 @@ pmap.AddLayer.Formats = {
             $("<span>").text("WFS Capabilities URL"),
             $("<input>").attr("name", "wfs_capabilities_url").textinput()
         ],
-        callback: function(map, form) {
+        getArgs: function(form) {
+            return {
+                url: $("input[name=wfs_capabilities_url]",form).val()
+            }
+        },
+        callback: function(map, args, urlCache) {
 
-            var url = $("input[name=wfs_capabilities_url]",form).val()
+            var url = args.url
 
             var self = this
 
@@ -220,6 +316,11 @@ pmap.AddLayer.Formats = {
                             REQUEST: "GetCapabilities"
                         }
                     )
+                })
+                .done(function (capabilities) {
+                    if (urlCache) {
+                        urlCache.addCache("wfs_capabilities", capabilities.service.title, { url: url })
+                    }
                 })
                 .pipe(function (capabilities) {
                     return self._addCapabilities(map, capabilities)            
