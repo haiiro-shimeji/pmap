@@ -4,11 +4,10 @@
         <meta charset="utf-8">
         <title>QUnit Example</title>
         <link rel="stylesheet" href="css/qunit.css">
-    </head>
-    <body>
-        <div id="qunit"></div>
         <script src="../assets/www/OpenLayers/OpenLayers.js"></script>
         <script src="../assets/www/jquery-1.8.3.min.js"></script>
+        <script src="../assets/www/jquery.cookie.js"></script>
+        <script src="../assets/www/linq.js"></script>
         <!-- compete with qunit ??-->
         <!-- <script src="../assets/www/jquery.mobile-1.2.0.min.js"></script> -->
         <script src="../assets/www/underscore-min.js"></script>
@@ -21,14 +20,20 @@
         <script src="../assets/www/js/menu.js"></script>
         <script src="../assets/www/js/addlayer.js"></script>
         <script src="../assets/www/js/drawpath.js"></script>
+        <script src="../assets/www/js/storage.js"></script>
+        <script src="../assets/www/js/cookiestorage.js"></script>
         <script src="../assets/www/js/stub.js"></script>
         <script src="js/qunit.js"></script>
         <script src="js/jsmockito-1.0.4-minified.js"></script>
         <script src="js/jshamcrest-min.js"></script>
-        <script src="js/pmap/drawpath.js"></script>
+    </head>
+    <body>
+        <div id="qunit"></div>
         <script type="text/javascript">
             JsHamcrest.Integration.QUnit()
             JsMockito.Integration.QUnit()
         </script>
-</body>
+        <script src="js/pmap/drawpath.js"></script>
+        <script src="js/pmap/cookiestorage.js"></script>
+    </body>
 </html>
