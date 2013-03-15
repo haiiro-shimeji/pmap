@@ -209,6 +209,10 @@ pmap.DrawPath.Canvas = Backbone.View.extend({
     lineTo: function(newPoint) {
         this.currentContext.lineTo(newPoint.x, newPoint.y)
         this.currentContext.stroke()
+    },
+
+    clearPath: function() {
+        this.currentContext.closePath()
     }
 
 })
