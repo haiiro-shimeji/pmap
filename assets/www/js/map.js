@@ -3,7 +3,9 @@ pmap.Map = {}
 pmap.Map.View = Backbone.View.extend({
 
     render: function() {
-        pmap.Map.getInstance().init()
+        var map = pmap.Map.getInstance()
+        map.init()
+        ;(new pmap.ZoomControl.View({ map: map.olMap })).render()
         return this
     }
 

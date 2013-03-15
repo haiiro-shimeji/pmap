@@ -73,6 +73,15 @@ body {
     z-index: 65535;
 }
 
+#zoom_control {
+    position: absolute;
+    width: 64px;
+    height: 64px;
+    left: -32px;
+    top: 50%;
+    background-color: #000;
+}
+
 #debug {
     position: absolute;
     left: 0;
