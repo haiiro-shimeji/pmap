@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="app">
     <head>
         <title></title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -8,63 +8,41 @@
         <link rel="stylesheet" href="OpenLayers/theme/default/style.css" type="text/css">
         <link rel="stylesheet" href="OpenLayers/theme/default/google.css" type="text/css">
         <script src="cordova-2.2.0.js"></script>
-        <script src="http://maps.google.com/maps/api/js?v=3&amp;sensor=false"></script>
         <script src="OpenLayers/OpenLayers.js"></script>
-        <link rel="stylesheet" href="jquery.mobile-1.2.0.min.css" />
-        <script src="jquery-1.8.3.min.js"></script>
-        <script src="jquery.mobile-1.2.0.min.js"></script>
-        <script src="jquery.cookie.js"></script>
-        <script src="underscore-min.js"></script>
-        <script src="backbone-min.js"></script>
+        <script src="angular.min.js"></script>
         <script src="linq.js"></script>
         <link rel="stylesheet" href="css/style.css" />
-        <script src="js/application.js"></script>
-        <script src="js/view.js"></script>
-        <script src="js/map.js"></script>
-        <script src="js/debug.js"></script>
-        <script src="js/location.js"></script>
-        <script src="js/menu.js"></script>
-        <script src="js/addlayer.js"></script>
-        <script src="js/addfeature.js"></script>
-        <script src="js/drawpath.js"></script>
-        <script src="js/storage.js"></script>
-        <script src="js/cookiestorage.js"></script>
-        <script src="js/stub.js"></script>
-        <script type="text/javascript">
-            $(function() {
-                pmap.Application.getInstance().init()
-            })
-        </script>
+        <script src="js/app.js"></script>
     </head>
     <body>
-        <div data-role="page" id="main">
+        <div id="main">
             <div id="header">
                 <form action='#' id="search_form">
                     <input type="search" placeholder="input address.." data-mini="true">
-                </form>
-                <div id="location_button">L</div>
-                <div id="menu_button">
-                    M
-                    <div id="menu"></div>
+                    </form>
+                    <div id="location_button">L</div>
+                    <div id="menu_button">
+                        M
+                        <div id="menu"></div>
+                    </div>
+                </div>
+                <div id="map" ng-controller="MapCtrl">
+                    <div id="location" style="position: absolute; z-index: 65535;"></div>
+                </div>
+                <div id="add_layer_popup" data-role="popup">
+                    <form id="add_layer_form">
+                        <select name="url_format"></select>
+                        <div id="add_layer_inputs"></div>
+                        <input type="submit" value="Add"/>
+                        <div id="add_layer_history"></div>
+                    </form>
+                </div>
+                <div id="add_feature_panel">
+                    <div id="draw_path_toggle" style="width: 44px; height: 44px;
+                            margin: auto; background-image: url('images/pen1.png'); background-repeat: no-repeat"></div>
+                    <div class="feature_icon" style="width: 44px; height: 44px; margin: auto; background-image: url('images/feature_dummy.png'); background-repeat: no-repeat">
+                    </div>
                 </div>
             </div>
-            <div id="map">
-                <div id="location" style="position: absolute; z-index: 65535;"></div>
-            </div>
-            <div id="add_layer_popup" data-role="popup">
-                <form id="add_layer_form">
-                    <select name="url_format"></select>
-                    <div id="add_layer_inputs"></div>
-                    <input type="submit" value="Add"/>
-                    <div id="add_layer_history"></div>
-                </form>
-            </div>
-            <div id="add_feature_panel">
-                <div id="draw_path_toggle" style="width: 44px; height: 44px;
-                    margin: auto; background-image: url('images/pen1.png'); background-repeat: no-repeat"></div>
-                <div class="feature_icon" style="width: 44px; height: 44px; margin: auto; background-image: url('images/feature_dummy.png'); background-repeat: no-repeat">
-                </div>
-            </div>
-        </div>
-    </body>
-</html>
+        </body>
+    </html>
